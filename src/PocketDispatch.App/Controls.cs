@@ -205,7 +205,7 @@ namespace PocketDispatch.App
             using (var f = Theme.Din(10.5f, FontStyle.Bold))
             {
                 float x = pad;
-                foreach (var chip in new[] { o.Get("callsign"), o.Get("type"), o.Get("reg"), o.Get("cruise_fl").Split(' ')[0], o.Get("t_out") == "-" ? "" : "OUT " + o.Get("t_out") })
+                foreach (var chip in new[] { o.Get("callsign"), o.Get("airframe") == "-" ? o.Get("reg") : o.Get("airframe"), o.Get("type"), o.Get("cruise_fl").Split(' ')[0], o.Get("t_out") == "-" ? "" : "OUT " + o.Get("t_out") })
                 {
                     if (string.IsNullOrEmpty(chip) || chip == "-") continue;
                     var sz = g.MeasureString(chip, f);

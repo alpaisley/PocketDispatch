@@ -17,6 +17,8 @@ namespace PocketDispatch.App
         readonly TextBox _avitab = new TextBox();
         readonly TextBox _fms = new TextBox();
         readonly ComboBox _aircraft = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+        readonly ComboBox _keep = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+        static readonly int[] KeepValues = { 0, 3, 1 };
         readonly CheckBox _a5 = new CheckBox { Text = "A5 pages - bigger text on the AviTab screen", AutoSize = true };
         readonly CheckBox _keepPdf = new CheckBox { Text = "Also save SimBrief's full OFP PDF", AutoSize = true };
         readonly CheckBox _startMin = new CheckBox { Text = "Start minimised to the tray", AutoSize = true };
@@ -28,7 +30,7 @@ namespace PocketDispatch.App
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = MinimizeBox = false;
             StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(640, 500);
+            ClientSize = new Size(640, 560);
             BackColor = Theme.Bg;
             ForeColor = Theme.Text;
             Font = Theme.UI(9.5f);
@@ -78,6 +80,8 @@ namespace PocketDispatch.App
             section("BRIEF");
             _aircraft.Items.AddRange(new object[] { "Auto-detect", "erj", "toliss", "q400", "generic" });
             row("Aircraft layout", _aircraft, null);
+            _keep.Items.AddRange(new object[] { "Keep all", "Keep the last 3 flights", "Only the latest flight" });
+            row("Old briefs in AviTab", _keep, null);
             var checks = new FlowLayoutPanel { AutoSize = true, WrapContents = false, FlowDirection = FlowDirection.TopDown, Margin = new Padding(0, 4, 0, 0) };
             foreach (var cb in new[] { _a5, _keepPdf, _startMin }) { cb.ForeColor = Theme.Text; checks.Controls.Add(cb); }
             grid.Controls.Add(new Label());
@@ -86,7 +90,7 @@ namespace PocketDispatch.App
 
             var hint = new Label
             {
-                Text = "Leave AviTab / FMS blank for the standard X-Plane folders.\nYour Pilot ID is on simbrief.com > Account Settings.",
+                Text = "Leave AviTab / FMS blank for the standard X-Plane folders. Old briefs go to the Recycle Bin;\nonly Pocket Dispatch's own files are ever removed. Pilot ID: simbrief.com > Account Settings.",
                 AutoSize = false, Dock = DockStyle.Bottom, Height = 40, ForeColor = Theme.Muted, Padding = new Padding(20, 0, 20, 0), Font = Theme.UI(8.5f),
             };
 
@@ -109,6 +113,7 @@ namespace PocketDispatch.App
             _fms.Text = s.FmsFolder;
             _aircraft.SelectedItem = string.IsNullOrEmpty(s.Aircraft) ? "Auto-detect" : s.Aircraft;
             if (_aircraft.SelectedIndex < 0) _aircraft.SelectedIndex = 0;
+            _keep.SelectedIndex = Math.Max(0, Array.IndexOf(KeepValues, s.KeepBriefsResolved));
             _a5.Checked = s.A5;
             _keepPdf.Checked = s.KeepOriginalPdf;
             _startMin.Checked = s.StartMinimised;
@@ -129,6 +134,7 @@ namespace PocketDispatch.App
                 _s.AviTabFolder = _avitab.Text.Trim();
                 _s.FmsFolder = _fms.Text.Trim();
                 _s.Aircraft = _aircraft.SelectedIndex <= 0 ? "" : (string)_aircraft.SelectedItem;
+                _s.KeepBriefs = KeepValues[Math.Max(0, _keep.SelectedIndex)];
                 _s.A5 = _a5.Checked;
                 _s.KeepOriginalPdf = _keepPdf.Checked;
                 _s.StartMinimised = _startMin.Checked;

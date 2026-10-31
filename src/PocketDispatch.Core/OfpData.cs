@@ -71,6 +71,9 @@ public sealed class OfpData
         c["reg"] = T("aircraft/reg");
         c["type"] = FirstNonEmpty(T("aircraft/icaocode"), T("aircraft/icao_code"));
         c["type_name"] = T("aircraft/name");
+        // SimBrief "Aircraft Name" - for a saved airframe this is the name you gave it
+        c["ac_name"] = c["type_name"];
+        c["airframe"] = string.Join(" · ", new[] { c["reg"], c["ac_name"] }.Where(v => !string.IsNullOrWhiteSpace(v)));
         c["selcal"] = T("aircraft/selcal");
         c["airac"] = T("params/airac");
         c["date"] = o.Generated.ToString("dd MMM yyyy", Inv).ToUpperInvariant();

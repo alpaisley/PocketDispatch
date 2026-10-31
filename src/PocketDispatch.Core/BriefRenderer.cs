@@ -173,7 +173,7 @@ public static class BriefRenderer
 
         string ac = !string.IsNullOrEmpty(prof.Short) ? prof.Short : o.Get("type");
         string subtitle = $"{Title(o.Get("dep_name"))} ({o.Origin})  →  {Title(o.Get("arr_name"))} ({o.Destination})  |  " +
-                          $"{o.Get("date")}  |  {o.Get("callsign")}  |  {o.Get("reg")}";
+                          $"{o.Get("date")}  |  {o.Get("callsign")}  |  {o.Get("airframe")}";
 
         void Header(PdfPage p, string title)
         {

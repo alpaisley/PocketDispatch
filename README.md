@@ -52,13 +52,14 @@ MSBuild or Visual Studio also work: open `PocketDispatch.sln` and build in Relea
 ## Use
 
 1. Run `PocketDispatch.exe`. The first time, **Settings** opens: enter your **SimBrief Pilot ID** (simbrief.com > Account Settings) and your **X-Plane folder**. Leave the AviTab and FMS folders blank to use the standard locations.
-2. The **flight card** shows the latest plan on SimBrief: the route, callsign, fuel, ZFW, reserve, runways and V-speeds.
+2. The **flight card** shows the latest plan on SimBrief: the route, callsign, airframe (registration and the name you gave it on SimBrief), fuel, ZFW, reserve, runways and V-speeds. The brief's header line shows the airframe too, so you can see which one you planned with.
 3. Hit **FETCH FLIGHT PLAN**, or switch the **AUTO-DOWNLOAD** pill on and leave the app in the system tray. Every flight plan you generate on SimBrief is picked up within about 30 seconds, and a notification pops up. The **ACARS** panel logs what was saved where.
 4. Turn off the old SimBrief Downloader so you don't get duplicates.
 
 Other options (in Settings):
 - **A5 pages:** the text looks bigger on the AviTab screen.
 - **Also save SimBrief's full PDF:** keeps the complete OFP next to the brief.
+- **Old briefs in AviTab:** Keep all, Keep the last 3 flights, or Only the latest flight. Older briefs (and full OFPs) go to the Recycle Bin after each successful download. Only Pocket Dispatch's own files are removed, never your other charts. New installs start on Only the latest; if you're updating, it stays on Keep all until you change it.
 - **Aircraft layout:** detected automatically from the aircraft type (ERJ, ToLiSS Airbus, Q400, or Generic). You can force one here.
 
 Command line: `pdispatch` fetches once, `pdispatch --watch` keeps watching, `pdispatch --setup` asks for your details, and `pdispatch --xml saved.xml -o brief.pdf` builds a brief from a saved SimBrief XML file. It shares settings with the Windows app.
@@ -79,7 +80,7 @@ Available keys:
 
 | Area | Keys |
 |---|---|
-| Init | dep, arr, altn, callsign, flight, reg, type, cruise_fl, cruise_speed, cost_index, tropo, isa, avg_wind, trip_wind |
+| Init | dep, arr, altn, callsign, flight, reg, type, ac_name (SimBrief aircraft/airframe name), airframe (registration · name), cruise_fl, cruise_speed, cost_index, tropo, isa, avg_wind, trip_wind |
 | Route | sid, enroute, star, route, to_rwy, ld_rwy |
 | Fuel / weights | block_f, taxi_f, trip_f, cont_f, altn_f, finres_f, reserve_f (FINRES+ALTN), tof_f, ldg_fuel_f, zfw_f, tow_f, law_f, max_zfw_f, max_tow_f, max_law_f, pax, wu (kg/lb) |
 | Take-off | to_len, len_unit, to_ils, to_flap, to_thrust, to_flex, to_maxtemp, to_v1, to_vr, to_v2, to_vother, to_vother_id, to_oat, to_wind, to_qnh |

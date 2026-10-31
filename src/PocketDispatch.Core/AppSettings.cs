@@ -14,6 +14,10 @@ public sealed class AppSettings
     /// <summary>SimBrief format codes, e.g. "xpe" (X-Plane 11/12).</summary>
     public List<string> FmsFormats { get; set; } = new() { "xpe" };
     public bool KeepOriginalPdf { get; set; }
+    /// <summary>How many briefs to keep in AviTab: 0 = all, 1 = only the latest, 3 = last three.
+    /// Missing (settings from before this option) = keep all.</summary>
+    public int? KeepBriefs { get; set; }
+    public int KeepBriefsResolved => KeepBriefs ?? 0;
     /// <summary>Blank = auto-detect from aircraft type.</summary>
     public string Aircraft { get; set; } = "";
     public bool A5 { get; set; }
@@ -66,7 +70,7 @@ public sealed class AppSettings
                 return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(FilePath)) ?? new();
         }
         catch { }
-        return new AppSettings { XPlaneFolder = GuessXPlane() };
+        return new AppSettings { XPlaneFolder = GuessXPlane(), KeepBriefs = 1 };
     }
 
     public void Save()
