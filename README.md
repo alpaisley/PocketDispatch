@@ -15,7 +15,19 @@ Pocket Dispatch replaces the SimBrief Downloader. It gets your latest SimBrief f
 
 All figures come straight from SimBrief's flight-plan data (the same feed the aircraft use for import), so nothing depends on the PDF layout. It needs no extra packages: the PDF is written by built-in code.
 
-## Build
+## Download
+
+Get the latest **PocketDispatch-x.y.z-win-x64.zip** from [Releases](https://github.com/alpaisley/PocketDispatch/releases/latest). Extract it and run `PocketDispatch.exe`; there's nothing else to install (Windows 10/11, 64-bit). On first run, Windows SmartScreen may say "Windows protected your PC" because the exe isn't signed: click **More info → Run anyway**.
+
+### Making a new release
+
+1. On GitHub, open **Releases → Draft a new release**.
+2. Under **Choose a tag**, type a new version such as `v1.1.0` and pick **Create new tag**.
+3. Click **Publish release**.
+
+GitHub builds the exe (it takes about 3–4 minutes) and attaches the ZIP to that release. Progress shows on the **Actions** tab.
+
+## Build it yourself
 
 You need the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (or Visual Studio 2022 with ".NET desktop development"). Run these from the folder that contains `PocketDispatch.sln`:
 

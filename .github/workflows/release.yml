@@ -1,0 +1,61 @@
+name: Build & release
+
+# Runs when a version tag like v1.2.0 is pushed, or when you publish a
+# release on GitHub with a new v* tag. Can also be run by hand from the
+# Actions tab (that just builds the exe as a downloadable artifact).
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Work out version
+        id: ver
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then v="${GITHUB_REF_NAME#v}"; else v="0.0.0-dev"; fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Publish self-contained exe
+        run: >
+          dotnet publish src/PocketDispatch.App -c Release -r win-x64
+          --self-contained true -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:Version=${{ steps.ver.outputs.version }}
+          -o publish
+
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path publish/PocketDispatch.exe -DestinationPath PocketDispatch-${{ steps.ver.outputs.version }}-win-x64.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PocketDispatch-${{ steps.ver.outputs.version }}-win-x64
+          path: publish/PocketDispatch.exe
+
+      - name: Attach to GitHub release
+        if: github.ref_type == 'tag'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$GITHUB_REF_NAME"
+          notes="Download **PocketDispatch-${tag#v}-win-x64.zip**, extract it and run \`PocketDispatch.exe\` - nothing else to install (Windows 10/11, 64-bit).
+
+          First run: Windows SmartScreen may say *Windows protected your PC* because the exe isn't signed - click **More info > Run anyway**."
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "Pocket Dispatch ${tag#v}" --notes "$notes"
+          gh release upload "$tag" PocketDispatch-*-win-x64.zip --clobber
