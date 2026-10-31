@@ -1,12 +1,19 @@
 name: Build & release
 
-# Runs when a version tag like v1.2.0 is pushed, or when you publish a
-# release on GitHub with a new v* tag. Can also be run by hand from the
-# Actions tab (that just builds the exe as a downloadable artifact).
+# Two ways to make a release:
+#  1. Actions tab > "Build & release" > Run workflow > type a version (e.g. 1.0.0)
+#  2. Releases > Draft a new release > create a new tag like v1.0.0 > Publish
+# Running it by hand with the version left blank just builds a test exe
+# (downloadable from the run's Artifacts section).
 on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 1.0.0 (leave blank for a test build only)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -24,8 +31,12 @@ jobs:
       - name: Work out version
         id: ver
         shell: bash
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then v="${GITHUB_REF_NAME#v}"; else v="0.0.0-dev"; fi
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then v="${GITHUB_REF_NAME#v}"
+          elif [[ -n "$INPUT_VERSION" ]]; then v="${INPUT_VERSION#v}"
+          else v="0.0.0-dev"; fi
           echo "version=$v" >> "$GITHUB_OUTPUT"
 
       - name: Publish self-contained exe
@@ -48,14 +59,14 @@ jobs:
           path: publish/PocketDispatch.exe
 
       - name: Attach to GitHub release
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' || github.event.inputs.version != ''
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="$GITHUB_REF_NAME"
+          tag="v${{ steps.ver.outputs.version }}"
           notes="Download **PocketDispatch-${tag#v}-win-x64.zip**, extract it and run \`PocketDispatch.exe\` - nothing else to install (Windows 10/11, 64-bit).
 
           First run: Windows SmartScreen may say *Windows protected your PC* because the exe isn't signed - click **More info > Run anyway**."
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "Pocket Dispatch ${tag#v}" --notes "$notes"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --target "$GITHUB_SHA" --title "Pocket Dispatch ${tag#v}" --notes "$notes"
           gh release upload "$tag" PocketDispatch-*-win-x64.zip --clobber

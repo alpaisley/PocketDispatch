@@ -21,11 +21,9 @@ Get the latest **PocketDispatch-x.y.z-win-x64.zip** from [Releases](https://gith
 
 ### Making a new release
 
-1. On GitHub, open **Releases → Draft a new release**.
-2. Under **Choose a tag**, type a new version such as `v1.1.0` and pick **Create new tag**.
-3. Click **Publish release**.
+On GitHub, open **Actions → Build & release → Run workflow**, type a version such as `1.1.0`, and click the green **Run workflow** button. GitHub builds the exe (it takes about 3–4 minutes), creates the release `v1.1.0` and attaches the ZIP.
 
-GitHub builds the exe (it takes about 3–4 minutes) and attaches the ZIP to that release. Progress shows on the **Actions** tab.
+You can also open **Releases → Draft a new release**, type a new tag such as `v1.1.0` (pick **Create new tag**) and click **Publish release**. The ZIP is added to that release automatically.
 
 ## Build it yourself
 
