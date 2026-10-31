@@ -76,6 +76,7 @@ public static class Profiles
             Init = L(CommonInit.Concat(new[] { "Cruise speed", "{cruise_speed}" }).ToArray()),
             Fuel = L("ZFW", "{zfw_f} {wu}",
                      "Block fuel", "{block_f} {wu}",
+                     "Passengers", "{pax}",
                      "Reserve (FINRES+ALTN)", "{reserve_f} {wu}",
                      "TOW / LAW", "{tow_f} / {law_f} {wu}"),
             Takeoff = L("Runway", "{to_rwy}  ·  {to_len} {len_unit}",
@@ -97,6 +98,7 @@ public static class Profiles
             Init = L(CommonInit.Concat(new[] { "Cost index", "{cost_index}", "TROPO", "{tropo}" }).ToArray()),
             Fuel = L("ZFW / ZFWCG", "{zfw_f} {wu}  /  ____",
                      "Block fuel", "{block_f} {wu}",
+                     "Passengers", "{pax}",
                      "RTE RSV", "{cont_f} {wu}",
                      "ALTN / FINAL", "{altn_f} / {finres_f} {wu}",
                      "TRIP WIND", "{trip_wind}"),
@@ -118,6 +120,7 @@ public static class Profiles
             Init = L(CommonInit),
             Fuel = L("ZFW", "{zfw_f} {wu}",
                      "Block fuel", "{block_f} {wu}",
+                     "Passengers", "{pax}",
                      "Reserve (FINRES+ALTN)", "{reserve_f} {wu}",
                      "TOW / LAW", "{tow_f} / {law_f} {wu}"),
             Takeoff = L("Runway", "{to_rwy}  ·  {to_len} {len_unit}",
@@ -137,6 +140,7 @@ public static class Profiles
             Init = L(CommonInit.Concat(new[] { "Cruise speed / CI", "{cruise_speed}" }).ToArray()),
             Fuel = L("ZFW", "{zfw_f} {wu}",
                      "Block fuel", "{block_f} {wu}",
+                     "Passengers", "{pax}",
                      "Reserve (FINRES+ALTN)", "{reserve_f} {wu}"),
             Takeoff = L("Runway", "{to_rwy}  ·  {to_len} {len_unit}",
                         "Flaps / thrust", "{to_flap}  /  {to_thrust}",
@@ -157,13 +161,35 @@ public static class Profiles
             if (File.Exists(path))
             {
                 var d = JsonSerializer.Deserialize<Dictionary<string, AircraftProfile>>(File.ReadAllText(path), Json);
-                if (d != null && d.Count > 0) return new(d, StringComparer.OrdinalIgnoreCase);
+                if (d != null && d.Count > 0)
+                {
+                    if (AddPassengers(d)) File.WriteAllText(path, Serialize(d));
+                    return new(d, StringComparer.OrdinalIgnoreCase);
+                }
             }
             Directory.CreateDirectory(folder);
             File.WriteAllText(path, Serialize(Defaults()));
         }
         catch { /* fall back to built-in defaults */ }
         return Defaults();
+    }
+
+    /// <summary>
+    /// Upgrade for profiles.json files written before the Passengers row existed:
+    /// adds it under Block fuel to any layout that doesn't mention {pax} anywhere.
+    /// </summary>
+    static bool AddPassengers(Dictionary<string, AircraftProfile> d)
+    {
+        bool changed = false;
+        foreach (var p in d.Values)
+        {
+            var all = p.Init.Concat(p.Fuel).Concat(p.Takeoff).Concat(p.Arrival);
+            if (all.Any(r => r.Length > 1 && r[1].Contains("{pax", StringComparison.OrdinalIgnoreCase))) continue;
+            int at = p.Fuel.FindIndex(r => r.Length > 1 && r[1].Contains("{block_f}"));
+            p.Fuel.Insert(at >= 0 ? at + 1 : p.Fuel.Count, new[] { "Passengers", "{pax}" });
+            changed = true;
+        }
+        return changed;
     }
 
     public static string Detect(OfpData o, Dictionary<string, AircraftProfile> profiles)
